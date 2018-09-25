@@ -1,0 +1,75 @@
+<html>
+<head>
+    <style>
+        .weatherModule {
+            background: #f2f2f2;
+            height: 30px;
+            width: 800px;
+            border: 1px dashed #ccc;
+            padding: 1em;
+            margin-top: 20px;
+            margin-left: 50px;
+        }
+        .inputtop{
+            margin-top: 50px;
+        }
+        .imgsize{
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.4/angular.min.js" type="application/javascript"></script>
+</head>
+<body background="">
+<div align="center" class="inputtop">
+    <h2>Weather Information</h2>
+    <h4>Temperature in the next 5 hours for the provided State Code & City Name</h4>
+</div>
+<div ID="types" align="Center">
+    State Code: <input name="State" id="state"> &nbsp;
+    City Name : <input name="City" id="city">
+</div>
+<br>
+<div ng-app="weather" align="center" ng-controller="weatherctrl">
+    <button id="btn" ng-click="getWeather()"> Show Weather </button>
+    <br/>
+    <br/>
+    <div ng-show="weatherdata.hourly_forecast.length>0">
+        <div class="weatherModule" ng-repeat="eachhour in weatherdata.hourly_forecast|limitTo:limit">
+            {{"Temperature in " + city + " at " + eachhour.FCTTIME.pretty + " is " + eachhour.temp.english}} &#186;F  {{" and " + eachhour.icon }}
+            <img class="imgsize" src={{eachhour.icon_url}}> - Feels Like {{ eachhour.feelslike.english}} &#186;F <br>
+        </div>
+    </div>
+</div>
+<script>
+    angular.module('weather',[])
+        .controller('weatherctrl', function($scope, $http) {
+            $scope.getWeather = function() {
+                var state = document.getElementById("state").value;
+                var city = document.getElementById("city").value;
+                var flag=0;
+                if(!state){
+                    flag=1;
+                    alert("Please enter the State Code.");
+                }
+                if(!city){
+                    flag=1;
+                    alert("Please enter the City Name.");
+                }
+                var api = "http://api.wunderground.com/api/4bbbc25f4f5946dd/hourly/q/" + state.toString() + "/" + city.toString() + ".json";
+                $http.get(api).success(function(data) {
+                    $scope.weatherdata=data;
+                    if(!(data.hourly_forecast))
+                    {
+                        if(flag==0){
+                            alert("No Weather details found for the given Combination");
+                        }
+                    }
+                    $scope.city=city.toString();
+                    $scope.limit=5;
+                })
+            }
+        });
+</script>
+</body>
+</html>
